@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -11,6 +11,20 @@ from agent import Agent
 
 app = Flask(__name__)
 agent = Agent()
+
+
+# Serve frontend static files (index.html, app.js, styles.css, etc.)
+@app.route("/", methods=["GET"])
+def index():
+    return send_from_directory(str(ROOT), "index.html")
+
+
+@app.route("/<path:path>", methods=["GET"])
+def static_proxy(path):
+    # avoid exposing python source or backend endpoints through the static proxy
+    if path.startswith("api/") or path.endswith(".py"):
+        return ("Not Found", 404)
+    return send_from_directory(str(ROOT), path)
 
 
 @app.route("/api/chat", methods=["POST"])
