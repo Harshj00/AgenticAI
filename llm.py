@@ -73,23 +73,17 @@ def chat(messages):
     list-like objects). Returns a string response. For calculator requests the
     returned string is JSON (so `parser.parse_tool_call` can load it).
     """
-    # get the last user message content
     content = ""
     if isinstance(messages, (list, tuple)) and messages:
         last = messages[-1]
         if isinstance(last, dict):
             content = last.get("content", "")
         else:
-            # support objects like HumanMessage with .content
             content = getattr(last, "content", str(last))
     else:
         content = str(messages)
 
     text = content or ""
-
-    # Time/date request handler
-    if re.search(r"\btime\b|\bdate\b|current time|current date", text, re.IGNORECASE):
-        return json.dumps({"tool": "time"})
 
     # If the message is the agent's follow-up carrying tools_result, produce a
     # natural final answer instead of another calculator call.
@@ -101,6 +95,14 @@ def chat(messages):
             parts = text.split(':', 1)
             result = parts[1].strip() if len(parts) > 1 else text
         return f"Answer based on tools result: {result}"
+
+    # Name query handler
+    if re.search(r"\bwhat(?:'s| is) my name\b|\bwho am i\b|\bremember my name\b", text, re.IGNORECASE):
+        return "I don't have your name yet. Tell me your name and I will remember it."
+
+    # Time/date request handler
+    if re.search(r"\btime\b|\bdate\b|current time|current date", text, re.IGNORECASE):
+        return json.dumps({"tool": "time"})
 
     # Weather handler
     if _looks_like_weather(text):
