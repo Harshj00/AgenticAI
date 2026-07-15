@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent UI</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">AI Agent</p>
+            <h1>Ask your assistant anything</h1>
+            <p class="subtitle">
+              Chat with a lightweight local agent, ask questions, and get quick answers.
+            </p>
+          </div>
+        </header>
+
+        <div id="chatBox" class="chat-box" aria-live="polite"></div>
+
+        <form id="chatForm" class="chat-form">
+          <input
+            id="messageInput"
+            type="text"
+            placeholder="Type your message..."
+            autocomplete="off"
+            required
+          />
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "What is 2+2?"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: 4"
+    }
+]
