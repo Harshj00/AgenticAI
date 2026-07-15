@@ -17,8 +17,7 @@ from datetime import datetime
 def _looks_like_calculation(text: str) -> bool:
     if not text:
         return False
-    # require at least one digit OR a math function name
-    return bool(re.search(r"\d", text)) or bool(re.search(r"\bsqrt\b|\babs\b|\blog\b|\bround\b", text, re.IGNORECASE))
+    return bool(re.search(r"\d", text)) or bool(re.search(r"\bsqrt\b|\babs\b|\blog\b|\blog10\b|\bsin\b|\bcos\b|\btan\b|\bexp\b|\bfactorial\b|\bpi\b", text, re.IGNORECASE))
 
 
 def _extract_expression(text: str) -> str:
@@ -56,6 +55,19 @@ def _extract_conversion(text: str):
     return value, from_unit, to_unit
 
 
+def _looks_like_weather(text: str) -> bool:
+    if not text:
+        return False
+    return bool(re.search(r"\bweather\b|\bforecast\b|\btemperature\b|\bclimate\b", text, re.IGNORECASE))
+
+
+def _extract_city(text: str):
+    match = re.search(r"(?:weather|forecast|temperature|climate)(?:\s+for|\s+in|\s+at)?\s+([A-Za-z][A-Za-z\s'\-]+)", text, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
 def chat(messages):
     """Accepts the same message formats used in the project (list of dicts or
     list-like objects). Returns a string response. For calculator requests the
@@ -77,10 +89,7 @@ def chat(messages):
 
     # Time/date request handler
     if re.search(r"\btime\b|\bdate\b|current time|current date", text, re.IGNORECASE):
-        now = datetime.utcnow()
-        # India is UTC+5:30 (approximate)
-        ist = now.replace(hour=(now.hour + 5) % 24, minute=(now.minute + 30) % 60)
-        return f"The current date and time in India (approx.) is {ist.strftime('%Y-%m-%d %H:%M:%S')} IST"
+        return json.dumps({"tool": "time"})
 
     # If the message is the agent's follow-up carrying tools_result, produce a
     # natural final answer instead of another calculator call.
@@ -92,6 +101,12 @@ def chat(messages):
             parts = text.split(':', 1)
             result = parts[1].strip() if len(parts) > 1 else text
         return f"Answer based on tools result: {result}"
+
+    # Weather handler
+    if _looks_like_weather(text):
+        city = _extract_city(text)
+        tool_req = {"tool": "weather", "city": city or "Delhi"}
+        return json.dumps(tool_req)
 
     # Unit conversion handler: return JSON for unit_converter tool
     if _looks_like_unit_conversion(text):

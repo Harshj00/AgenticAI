@@ -6,5 +6,109 @@
     {
         "role": "assistant",
         "content": "Answer based on tools result: 4"
+    },
+    {
+        "role": "user",
+        "content": "yooo"
+    },
+    {
+        "role": "assistant",
+        "content": "I am a local assistant. Ask me to calculate something or a simple question."
+    },
+    {
+        "role": "user",
+        "content": "my name is harsh"
+    },
+    {
+        "role": "assistant",
+        "content": "I am a local assistant. Ask me to calculate something or a simple question."
+    },
+    {
+        "role": "user",
+        "content": "2+78"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: 80"
+    },
+    {
+        "role": "user",
+        "content": "2/10"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: 0.2"
+    },
+    {
+        "role": "user",
+        "content": "2%1"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: 0"
+    },
+    {
+        "role": "user",
+        "content": "2%10"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: 2"
+    },
+    {
+        "role": "user",
+        "content": "what things can you do"
+    },
+    {
+        "role": "assistant",
+        "content": "I am a local assistant. Ask me to calculate something or a simple question."
+    },
+    {
+        "role": "user",
+        "content": "weather of delhi"
+    },
+    {
+        "role": "assistant",
+        "content": "I am a local assistant. Ask me to calculate something or a simple question."
+    },
+    {
+        "role": "user",
+        "content": "My name is Asha"
+    },
+    {
+        "role": "assistant",
+        "content": "I am a local assistant. Ask me to calculate something or a simple question."
+    },
+    {
+        "role": "user",
+        "content": "What is sin(pi/2) plus 2?"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: Calculator error: unmatched ')' (<unknown>, line 1)"
+    },
+    {
+        "role": "user",
+        "content": "What time is it?"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: 15-07-2026 08:40:26 PM"
+    },
+    {
+        "role": "user",
+        "content": "What is the weather in Delhi?"
+    },
+    {
+        "role": "assistant",
+        "content": "Answer based on tools result: City: Delhi, India\nTemperature: 32.7°C\nWind Speed: 2.2 km/h\nWeather Code: 0"
+    },
+    {
+        "role": "user",
+        "content": "My name is Asha"
+    },
+    {
+        "role": "assistant",
+        "content": "I am a local assistant. Ask me to calculate something or a simple question."
     }
 ]

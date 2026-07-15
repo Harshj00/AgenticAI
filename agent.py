@@ -1,56 +1,69 @@
+import re
+
 from llm import chat
 from memory import load_memory, save_memory
 from prompts import SYSTEM_PROMPT
 from parser import parse_tool_call
-from tools import calculator, unit_converter
+from tools.registry import execute_tool
+
 
 class Agent:
+    def __init__(self):
+        self.session_name = None
+
+    def _remember_name(self, user_input: str):
+        if not user_input:
+            return None
+
+        name_patterns = [
+            r"\bmy name is\s+([A-Za-z][A-Za-z .'-]+)",
+            r"\bi am\s+([A-Za-z][A-Za-z .'-]+)",
+            r"\bcall me\s+([A-Za-z][A-Za-z .'-]+)",
+        ]
+
+        for pattern in name_patterns:
+            match = re.search(pattern, user_input, re.IGNORECASE)
+            if match:
+                name = match.group(1).strip()
+                if name.lower() not in {"a", "an", "the"}:
+                    self.session_name = name
+                    return name
+
+        return None
 
     def run(self, user_input: str) -> str:
         memory = load_memory()
+        self._remember_name(user_input)
 
-        messages = [
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            },]
+        system_prompt = SYSTEM_PROMPT
+        if self.session_name:
+            system_prompt += f"\nThe user's name is {self.session_name}. Use it naturally in replies when appropriate."
+
+        messages = [{"role": "system", "content": system_prompt}]
         messages.extend(memory)
-        messages.append(
-            {
-                "role": "user",
-                "content": user_input
-            })
-        
+        messages.append({"role": "user", "content": user_input})
+
         llm_response = chat(messages)
         tools_request = parse_tool_call(llm_response)
 
         if tools_request is None:
             memory.append({"role": "user", "content": user_input})
-            
             memory.append({"role": "assistant", "content": llm_response})
             save_memory(memory)
             return llm_response
-        
-        print("Tools requested:")
-        tools_result =""
-        if tools_request['tool'] == 'calculator':
-            expression = tools_request['expression']
-            tools_result = calculator(expression)
-        elif tools_request['tool'] == 'unit_converter':
-            tools_result = unit_converter(tools_request)
-        else:
-            tools_result = f"Tool is not supported."
 
+        print("Tools requested:")
+        try:
+            tools_result = execute_tool(tools_request["tool"], tools_request)
+        except Exception as exc:
+            tools_result = f"Tool error: {exc}"
 
         print("Observation: ", tools_result)
 
-        messages.append({
-            "role": "assistant",
-            "content": llm_response
-        })
+        messages.append({"role": "assistant", "content": llm_response})
         messages.append({
             "role": "user",
-            "content": f"tools_result: \n{tools_result}\nNow answer the original question based on the tools result."  
+            "content": f"tools_result: \n{tools_result}\nNow answer the original question based on the tools result."
         })
 
         final_response = chat(messages)
@@ -58,5 +71,4 @@ class Agent:
         memory.append({"role": "assistant", "content": final_response})
 
         save_memory(memory)
-        
         return final_response
