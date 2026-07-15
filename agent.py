@@ -31,9 +31,36 @@ class Agent:
 
         return None
 
+    def _is_name_query(self, user_input: str) -> bool:
+        return bool(re.search(r"\b(what(?:'s| is) my name|who am i|do you remember my name)\b", user_input, re.IGNORECASE))
+
+    def _is_name_assignment(self, user_input: str) -> bool:
+        return bool(re.search(r"\b(my name is|i am|call me)\b", user_input, re.IGNORECASE))
+
+    def _is_greeting(self, user_input: str) -> bool:
+        return bool(re.search(r"\b(hi|hello|hey|yo|yoo)\b", user_input, re.IGNORECASE))
+
+    def _is_name_query(self, user_input: str) -> bool:
+        return bool(re.search(r"\b(what(?:'s| is) my name|who am i|do you remember my name)\b", user_input, re.IGNORECASE))
+
+    def _is_name_assignment(self, user_input: str) -> bool:
+        return bool(re.search(r"\b(my name is|i am|call me)\b", user_input, re.IGNORECASE))
+
+    def _is_greeting(self, user_input: str) -> bool:
+        return bool(re.search(r"\b(hi|hello|hey|yo|yoo)\b", user_input, re.IGNORECASE))
+
     def run(self, user_input: str) -> str:
         memory = load_memory()
         self._remember_name(user_input)
+
+        if self._is_name_query(user_input) and self.session_name:
+            return f"Your name is {self.session_name}."
+
+        if self._is_name_assignment(user_input) and self.session_name:
+            return f"Nice to meet you, {self.session_name}."
+
+        if self._is_greeting(user_input) and self.session_name:
+            return f"Hello {self.session_name}! What can I help you with today?"
 
         system_prompt = SYSTEM_PROMPT
         if self.session_name:
