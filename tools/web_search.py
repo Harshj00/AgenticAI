@@ -1,6 +1,12 @@
 import requests
+import re
+import html
 
 DUCKDUCKGO_URL = "https://api.duckduckgo.com/"
+
+
+def _strip_tags(text: str) -> str:
+    return re.sub(r"<[^>]+>", "", text)
 
 
 def execute(arguments: dict):
@@ -59,6 +65,79 @@ def execute(arguments: dict):
 
         if snippets:
             return f"Search results for '{query}': " + " | ".join(snippets[:3])
+
+        # Fallback: fetch DuckDuckGo HTML search and extract snippets
+        try:
+            html_resp = requests.get(
+                "https://html.duckduckgo.com/html",
+                params={"q": query},
+                headers={"User-Agent": "AgenticAI/1.0 (+https://github.com/Harshj00/AgenticAI)"},
+                timeout=10,
+            )
+            html_resp.raise_for_status()
+            page = html_resp.text
+
+            # try to extract snippet blocks
+            snippet_matches = re.findall(r'<div[^>]+class="result__snippet"[^>]*>(.*?)</div>', page, flags=re.S)
+            results = []
+            if snippet_matches:
+                for s in snippet_matches:
+                    clean = html.unescape(_strip_tags(s)).strip()
+                    if clean:
+                        results.append(clean)
+                    if len(results) >= 3:
+                        break
+
+            # fallback to titles if snippets not found
+            if not results:
+                title_matches = re.findall(r'<a[^>]+class="result__a"[^>]*>(.*?)</a>', page, flags=re.S)
+                for t in title_matches:
+                    clean = html.unescape(_strip_tags(t)).strip()
+                    if clean:
+                        results.append(clean)
+                    if len(results) >= 3:
+                        break
+
+            if results:
+                return f"Search results for '{query}': " + " | ".join(results[:3])
+        except Exception:
+            pass
+
+        # Fallback: try Wikipedia search API for a likely answer/snippet
+        try:
+            wiki_resp = requests.get(
+                "https://en.wikipedia.org/w/api.php",
+                params={
+                    "action": "query",
+                    "list": "search",
+                    "srsearch": query,
+                    "utf8": 1,
+                    "format": "json",
+                    "srlimit": 3,
+                },
+                headers={"User-Agent": "AgenticAI/1.0 (+https://github.com/Harshj00/AgenticAI)"},
+                timeout=10,
+            )
+            wiki_resp.raise_for_status()
+            wiki_data = wiki_resp.json()
+            search = wiki_data.get("query", {}).get("search", [])
+            wiki_results = []
+            for item in search:
+                title = item.get("title")
+                snippet = item.get("snippet")
+                if snippet:
+                    clean = html.unescape(_strip_tags(snippet)).strip()
+                    if title:
+                        wiki_results.append(f"{title}: {clean}")
+                    else:
+                        wiki_results.append(clean)
+                if len(wiki_results) >= 3:
+                    break
+
+            if wiki_results:
+                return f"Search results for '{query}': " + " | ".join(wiki_results[:3])
+        except Exception:
+            pass
 
         return f"No direct answer found for '{query}'."
     except Exception as e:
