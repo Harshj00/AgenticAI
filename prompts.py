@@ -30,6 +30,12 @@ weather
 Purpose:
 The weather tool returns the current weather for a city.
 
+Tool Name:
+web_search
+
+Purpose:
+The web_search tool performs an online query and returns a concise search summary for the requested topic.
+
 ==================================================
 MANDATORY RULE
 

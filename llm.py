@@ -110,6 +110,12 @@ def chat(messages):
         tool_req = {"tool": "weather", "city": city or "Delhi"}
         return json.dumps(tool_req)
 
+    # Web search handler
+    if re.search(r"\bsearch\b|\bfind\b|\blook up\b|\bweb search\b|\bgoogle\b", text, re.IGNORECASE):
+        query = text.strip()
+        tool_req = {"tool": "web_search", "query": query}
+        return json.dumps(tool_req)
+
     # Unit conversion handler: return JSON for unit_converter tool
     if _looks_like_unit_conversion(text):
         conversion = _extract_conversion(text)
