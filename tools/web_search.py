@@ -20,16 +20,27 @@ def execute(arguments: dict):
                 "no_html": "1",
                 "skip_disambig": "1",
             },
+            headers={"User-Agent": "AgenticAI/1.0 (+https://github.com/Harshj00/AgenticAI)"},
             timeout=10,
         )
         response.raise_for_status()
         data = response.json()
 
         abstract = data.get("AbstractText", "").strip()
+        answer = data.get("Answer", "").strip()
+        definition = data.get("Definition", "").strip()
+        definition_source = data.get("DefinitionSource", "").strip()
         related = data.get("RelatedTopics", [])
+
+        if answer:
+            return f"Search answer for '{query}': {answer}"
 
         if abstract:
             return f"Search result for '{query}': {abstract}"
+
+        if definition:
+            label = f" ({definition_source})" if definition_source else ""
+            return f"Search definition for '{query}': {definition}{label}"
 
         snippets = []
         for item in related:

@@ -61,6 +61,15 @@ def _looks_like_weather(text: str) -> bool:
     return bool(re.search(r"\bweather\b|\bforecast\b|\btemperature\b|\bclimate\b", text, re.IGNORECASE))
 
 
+def _looks_like_web_search(text: str) -> bool:
+    if not text:
+        return False
+    if re.search(r"\b(search|find|look up|web search|google)\b", text, re.IGNORECASE):
+        return True
+    # if the text looks like a general knowledge question and is not a calculation or unit conversion
+    return bool(re.search(r"\b(who|what|when|where|why|how|which|tell me about|define|information about)\b", text, re.IGNORECASE))
+
+
 def _extract_city(text: str):
     match = re.search(r"(?:weather|forecast|temperature|climate)(?:\s+for|\s+in|\s+at)?\s+([A-Za-z][A-Za-z\s'\-]+)", text, re.IGNORECASE)
     if match:
@@ -111,7 +120,7 @@ def chat(messages):
         return json.dumps(tool_req)
 
     # Web search handler
-    if re.search(r"\bsearch\b|\bfind\b|\blook up\b|\bweb search\b|\bgoogle\b", text, re.IGNORECASE):
+    if _looks_like_web_search(text):
         query = text.strip()
         tool_req = {"tool": "web_search", "query": query}
         return json.dumps(tool_req)
